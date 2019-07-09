@@ -3,11 +3,7 @@ json = loadfile('dkjson.lua')()
 local raw_input_dir = './raw_input'
 local json_output_dir = './json_output'
 
---print(gamedata)
---print(json.encode(gamedata))
-
--- Lua implementation of PHP scandir function
--- https://stackoverflow.com/questions/5303174/how-to-get-list-of-directories-in-lua
+-- Utility Function
 function scandir(directory)
     local i, t, popen = 0, {}, io.popen
     local pfile = popen('dir /b "'..directory..'"')
@@ -73,7 +69,7 @@ for key,value in pairs(table_list) do
 end
 
 -- Process each files
-print('--',"Parsing starts",'--')
+print('--',"Parsing start",'--')
 for key,value in pairs(table_list) do
   print(key,value)
   
@@ -87,12 +83,12 @@ for key,value in pairs(table_list) do
   saveJsonFile(outputPath,gamedata)
 end
 
-print('--',"Parsing ends",'--')
+print('--',"Parsing end','--')
 
 
 
 -- Compare output/input size
-print('--',"Checking filesize starts",'--')
+print('--',"Checking filesize start",'--')
 for key,value in pairs(table_list) do
   local fname = split(value,'.')
   local filename = fname[0]
@@ -107,4 +103,4 @@ for key,value in pairs(table_list) do
     print('> Output size is too small ',outputsize..'/'..inputsize,filename)
   end
 end
-print('--',"Checking filesize ends",'--')
+print('--',"Checking filesize end",'--')
