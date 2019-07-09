@@ -1,9 +1,9 @@
 json = loadfile('dkjson.lua')()
 
-local raw_input_dir = './raw_input'
-local json_output_dir = './json_output'
+local raw_input_dir = 'raw_input'
+local json_output_dir = 'json_output'
 
--- Utility Function
+-- Lua implementation of PHP scandir function
 function scandir(directory)
     local i, t, popen = 0, {}, io.popen
     local pfile = popen('dir /b "'..directory..'"')
@@ -39,6 +39,23 @@ function saveJsonFile(filename,content)
   io.close(file)
 end
 
+function json_encode(data)
+  for key,value in pairs(data) do
+      if(type(value) == "string") then    
+        -- Parse string to table
+        value = value:gsub('\n','\\n')
+        
+        -- Only call loaded string if it is function type.
+        local loaded = load('return '..value)
+        if(type(loaded) == "function") then
+          data[key] = loaded()
+        end
+      end
+  end
+  
+  return json.encode(data)
+end
+
 function getInputPath(filename)
   return raw_input_dir..'/'..filename
 end
@@ -49,10 +66,16 @@ end
   
 
 
-
 ---------------
 -- Init scan --
 ---------------
+-- Make dirs if they are not exist.
+os.execute("mkdir " .. raw_input_dir)
+os.execute("mkdir " .. json_output_dir)
+
+raw_input_dir = './'..raw_input_dir
+json_output_dir = './'..json_output_dir
+
 table_list = scandir(raw_input_dir)
 
 -- Check files validity
@@ -69,7 +92,7 @@ for key,value in pairs(table_list) do
 end
 
 -- Process each files
-print('--',"Parsing start",'--')
+print('--',"Parsing starts",'--')
 for key,value in pairs(table_list) do
   print(key,value)
   
@@ -79,16 +102,16 @@ for key,value in pairs(table_list) do
   local inputPath = getInputPath(value)  
   local outputPath = getOutputPath(filename)
   
-  gamedata = json.encode(loadfile(inputPath)())
+  gamedata = json_encode(loadfile(inputPath)())
   saveJsonFile(outputPath,gamedata)
 end
 
-print('--',"Parsing end','--')
+print('--',"Parsing ends",'--')
 
 
 
 -- Compare output/input size
-print('--',"Checking filesize start",'--')
+print('--',"Checking filesize starts",'--')
 for key,value in pairs(table_list) do
   local fname = split(value,'.')
   local filename = fname[0]
@@ -103,4 +126,4 @@ for key,value in pairs(table_list) do
     print('> Output size is too small ',outputsize..'/'..inputsize,filename)
   end
 end
-print('--',"Checking filesize end",'--')
+print('--',"Checking filesize ends",'--')
